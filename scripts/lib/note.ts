@@ -75,10 +75,15 @@ function parseSpring(enText: string | undefined, ruText: string | undefined) {
   if (!enText) return null;
   const kv = (text: string) => {
     const o: Record<string, string> = {};
+    let cur: string | null = null;
+    let buf: string[] = [];
+    const flush = () => { if (cur) o[cur] = buf.join("\n").trim(); buf = []; };
     for (const line of text.split("\n")) {
-      const m = line.match(/^-\s*([a-zA-Z]+):\s*(.*)$/);
-      if (m) o[m[1]] = m[2].trim();
+      const m = line.match(/^###\s+(concept|springFeature|explanation)\s*$/);
+      if (m) { flush(); cur = m[1]; }
+      else if (cur) buf.push(line);
     }
+    flush();
     return o;
   };
   const e = kv(enText);
@@ -104,7 +109,7 @@ export function serializeNote(n: NormTopic, track: string, status: "draft" | "pu
     parts.push(`## Tip\n${n.tip[side]}`);
     if (n.spring) {
       parts.push(
-        `## Spring\n- concept: ${n.spring.concept[side]}\n- springFeature: ${n.spring.springFeature[side]}\n- explanation: ${n.spring.explanation[side]}`,
+        `## Spring\n### concept\n${n.spring.concept[side]}\n\n### springFeature\n${n.spring.springFeature[side]}\n\n### explanation\n${n.spring.explanation[side]}`,
       );
     }
     const qs = n.interviewQs

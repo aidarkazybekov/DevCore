@@ -14,7 +14,11 @@ const n: NormTopic = {
   interviewQs: [
     { id: "1-1-q1", difficulty: "senior", q: { ru: "вопрос", en: "question" }, a: { ru: "ответ", en: "answer" } },
   ],
-  spring: { concept: { ru: "к", en: "c" }, springFeature: { ru: "ф", en: "f" }, explanation: { ru: "о", en: "e" } },
+  spring: {
+    concept: { ru: "к1\n\nк2", en: "c1\n\nc2" },
+    springFeature: { ru: "ф", en: "f" },
+    explanation: { ru: "строка1\n\nстрока2\n- пункт", en: "line1\n\nline2\n- bullet" },
+  },
 };
 
 describe("note serialize/parse round-trip", () => {

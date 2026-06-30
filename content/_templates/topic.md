@@ -23,9 +23,14 @@ status: draft
 <one-line interview tip>
 
 ## Spring
-- concept: <java concept>
-- springFeature: <spring feature>
-- explanation: <how they connect>
+### concept
+<java concept>
+
+### springFeature
+<spring feature>
+
+### explanation
+<how they connect>
 
 ## Interview
 ### [BLOCK-N-q1 | mid] <question>
