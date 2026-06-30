@@ -365,8 +365,8 @@ import { decompose, type NormTopic } from "./lib/norm";
 
 async function main() {
   // Import the lazy-loaded content map and resolve every module.
-  const { default: contentModules } = (await import("../src/data/content/index")) as {
-    default: Record<string, () => Promise<{ topic: import("../src/lib/types").TopicContent }>>;
+  const { contentModules } = (await import("../src/data/content/index")) as {
+    contentModules: Record<string, () => Promise<{ topic: import("../src/lib/types").TopicContent }>>;
   };
 
   const out: Record<string, NormTopic> = {};
@@ -385,7 +385,7 @@ async function main() {
 main();
 ```
 
-Note: this requires `src/data/content/index.ts` to default-export the map. Read the current file first — it declares `const contentModules = {...}`. If it is not `export default contentModules`, add `export default contentModules;` at the end (this is backward compatible; the app's named import, if any, is unaffected). Verify how the app imports it (`grep -rn "content/index\|from \"@/data/content\"" src`) and keep that export intact.
+Note: `src/data/content/index.ts` already has `export { contentModules };` (a named export) plus a `getTopicContent` helper the app imports — so this script uses the **named** `contentModules` export and does NOT modify `index.ts`. The content modules import only `import { TopicContent } from "@/lib/types"`, which is a **type-only** import that tsx/esbuild erases at runtime, so no `@/` alias resolution is required for the dynamic imports to work. (`tsconfig.json` already has `resolveJsonModule: true`, so the JSON fixture import in Step 3 needs no config change.)
 
 - [ ] **Step 2: Run the snapshot script**
 
@@ -414,7 +414,7 @@ describe("content baseline fixture", () => {
   });
 });
 ```
-(If `tsconfig.json` lacks `resolveJsonModule`, add `"resolveJsonModule": true` under `compilerOptions`.)
+(`tsconfig.json` already has `resolveJsonModule: true` — no change needed.)
 
 - [ ] **Step 4: Run the test**
 
@@ -424,7 +424,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/snapshot-baseline.ts scripts/snapshot-baseline.test.ts tests/fixtures/content-baseline.json src/data/content/index.ts tsconfig.json
+git add scripts/snapshot-baseline.ts scripts/snapshot-baseline.test.ts tests/fixtures/content-baseline.json
 git commit -m "feat: capture NormTopic baseline of all topics"
 ```
 
@@ -822,11 +822,12 @@ describe("emit", () => {
     expect(src).toContain("export const topic: TopicContent =");
     expect(src).toContain('"id": "1-1"');
   });
-  it("emits a lazy-import index with one entry per id", () => {
+  it("emits a lazy-import index with one entry per id, preserving the helper + named export", () => {
     const idx = emitIndex(["1-1", "2-3"]);
     expect(idx).toContain('"1-1": () => import("./1-1")');
     expect(idx).toContain('"2-3": () => import("./2-3")');
-    expect(idx).toContain("export default contentModules");
+    expect(idx).toContain("export async function getTopicContent");
+    expect(idx).toContain("export { contentModules }");
   });
 });
 ```
@@ -856,14 +857,24 @@ export function emitIndex(ids: string[]): string {
   const entries = sorted
     .map((id) => `  ${JSON.stringify(id)}: () => import(${JSON.stringify("./" + id)}),`)
     .join("\n");
+  // Regenerate the FULL index.ts — the map PLUS the getTopicContent helper and
+  // named export that the app imports (`import { getTopicContent } from "@/data/content"`).
   return (
     `import { TopicContent } from "@/lib/types";\n\n` +
     `const contentModules: Record<string, () => Promise<{ topic: TopicContent }>> = {\n` +
     `${entries}\n};\n\n` +
-    `export default contentModules;\n`
+    `export async function getTopicContent(id: string): Promise<TopicContent | null> {\n` +
+    `  const loader = contentModules[id];\n` +
+    `  if (!loader) return null;\n` +
+    `  const mod = await loader();\n` +
+    `  return mod.topic;\n` +
+    `}\n\n` +
+    `export { contentModules };\n`
   );
 }
 ```
+
+The generated `index.ts` must match today's exports exactly: a `contentModules` map, an `export async function getTopicContent(id)`, and `export { contentModules }`. The app imports `getTopicContent` from `@/data/content`, so dropping it would break the build. Entry order is lexical (cosmetic only — `index.ts` is git-ignored after Task 9).
 
 - [ ] **Step 4: Run the test**
 
