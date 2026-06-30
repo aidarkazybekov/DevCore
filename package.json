@@ -9,7 +9,17 @@
     "preview:cloudflare": "npx wrangler dev",
     "deploy:cloudflare": "npx wrangler deploy",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "compile-content": "tsx scripts/compile-content.ts",
+    "snapshot-baseline": "tsx scripts/snapshot-baseline.ts",
+    "migrate-content": "tsx scripts/migrate-to-vault.ts",
+    "predev": "npm run compile-content",
+    "prebuild": "npm run compile-content",
+    "pretest": "npm run compile-content",
+    "prelint": "npm run compile-content",
+    "typecheck": "npm run compile-content && tsc --noEmit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",
@@ -29,7 +39,10 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
+    "gray-matter": "^4.0.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.22.4",
+    "typescript": "^5",
+    "vitest": "^2.1.9"
   }
 }

@@ -9,12 +9,12 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { splitLocalized, localized } from "./localized";
 
 export type Locale = "ru" | "en";
 
 const STORAGE_KEY = "java-core:locale";
 const DEFAULT_LOCALE: Locale = "en";
-const SEPARATOR = /\n\s*---\s*\n/;
 
 interface LocaleContextValue {
   locale: Locale;
@@ -68,24 +68,6 @@ export function useLocale(): LocaleContextValue {
   return ctx;
 }
 
-/**
- * Splits a bilingual string on the `\n---\n` separator.
- * Returns { ru, en }. If the string has no separator, both halves return the
- * original text so UIs can fall back to a single language transparently.
- */
-export function splitLocalized(text: string): { ru: string; en: string } {
-  if (!text) return { ru: "", en: "" };
-  const parts = text.split(SEPARATOR);
-  if (parts.length < 2) return { ru: text, en: text };
-  const [ru, ...rest] = parts;
-  return { ru: ru.trim(), en: rest.join("\n---\n").trim() };
-}
-
-export function localized(text: string, locale: Locale): string {
-  const { ru, en } = splitLocalized(text);
-  return locale === "ru" ? ru : en;
-}
-
 export const UI_STRINGS = {
   summary: { ru: "Кратко", en: "Summary" },
   deepDive: { ru: "Подробно", en: "Deep Dive" },
@@ -120,3 +102,5 @@ export const UI_STRINGS = {
 export function t(key: keyof typeof UI_STRINGS, locale: Locale): string {
   return UI_STRINGS[key][locale];
 }
+
+export { splitLocalized, localized };
