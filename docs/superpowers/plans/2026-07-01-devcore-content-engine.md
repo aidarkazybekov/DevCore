@@ -441,7 +441,8 @@ git commit -m "feat: capture NormTopic baseline of all topics"
 - Produces:
   - `serializeNote(n: NormTopic, track: string, status: "draft" | "published"): { en: string; ru: string }`
   - `parseNotePair(enRaw: string, ruRaw: string): NormTopic`
-  - `EN_SECTIONS` constant (section order) for reuse by the template.
+
+**Critical parsing rule:** lesson prose (especially `deepDive`) contains its own `##` markdown headings (e.g. `## Runtime Data Areas`). The section parser must treat a `## X` line as a section boundary **only when `X` (case-insensitive) is one of the reserved section names**: `title`, `summary`, `deep dive`, `code`, `tip`, `spring`, `interview`. Any other `##` is ordinary content inside the current section. (Authors must not name a subheading exactly after a reserved section — note this in the template.)
 
 **Note markdown contract** (both EN and `ru/` mirror use identical structure; only frontmatter `track`/`diagram`/`status` live in EN):
 ```
@@ -452,6 +453,9 @@ track: java-core
 status: draft
 diagram: jvm-architecture
 ---
+## Title
+<text>
+
 ## Summary
 <text>
 
@@ -502,12 +506,12 @@ const n: NormTopic = {
 };
 
 describe("note serialize/parse round-trip", () => {
-  it("preserves every field (title comes from frontmatter-independent sections)", () => {
+  it("preserves every field, including deepDive that contains its own ## headings", () => {
     const { en, ru } = serializeNote(n, "java-core", "draft");
     const back = parseNotePair(en, ru);
-    // title is not a markdown section here; carry it via the test by re-adding:
+    expect(back.title).toEqual(n.title);
     expect(back.summary).toEqual(n.summary);
-    expect(back.deepDive).toEqual(n.deepDive);
+    expect(back.deepDive).toEqual(n.deepDive);   // n.deepDive has a `## Section` heading — must survive
     expect(back.tip).toEqual(n.tip);
     expect(back.code).toBe(n.code);
     expect(back.interviewQs).toEqual(n.interviewQs);
@@ -519,7 +523,7 @@ describe("note serialize/parse round-trip", () => {
 });
 ```
 
-Title handling: store `title` as a first `## Title` section (RU/EN) so it round-trips like other prose. Update the test to also assert `expect(back.title).toEqual(n.title);` and include a `## Title` section in the contract above (add it as the first section).
+`title` is stored as the first `## Title` section (RU/EN) so it round-trips like other prose. The sample `n.deepDive` deliberately contains a `## Section` / `## Раздел` heading: because `section`/`раздел` are not reserved names, the parser must keep them as deepDive content — this is the regression guard for the critical parsing rule.
 
 - [ ] **Step 2: Run to verify it fails**
 
@@ -536,7 +540,11 @@ import type { NormTopic, NormQ, Loc } from "./norm";
 const HEADING = /^##\s+(.+?)\s*$/;
 const Q_HEAD = /^###\s+\[([^|\]]+)\|([^\]]+)\]\s*(.*)$/;
 
-/** Split markdown body (frontmatter already stripped) into `## Section` → text. */
+// A `## X` line is a section boundary ONLY when X is a reserved name.
+// Any other `##` (e.g. `## Runtime Data Areas` inside a deepDive) is content.
+const RESERVED = new Set(["title", "summary", "deep dive", "code", "tip", "spring", "interview"]);
+
+/** Split markdown body (frontmatter already stripped) into reserved `## Section` → text. */
 function sectionize(body: string): Record<string, string> {
   const out: Record<string, string> = {};
   let cur: string | null = null;
@@ -547,7 +555,7 @@ function sectionize(body: string): Record<string, string> {
   };
   for (const line of body.split("\n")) {
     const m = line.match(HEADING);
-    if (m) {
+    if (m && RESERVED.has(m[1].trim().toLowerCase())) {
       flush();
       cur = m[1].trim().toLowerCase();
     } else if (cur) {
