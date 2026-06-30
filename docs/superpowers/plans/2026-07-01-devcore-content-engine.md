@@ -4,7 +4,7 @@
 
 **Goal:** Make an in-repo Obsidian content vault the single source of truth for all topic content, compiled to the existing typed `TopicContent` shape at build time, with build-enforced RU/EN parity — without changing a single pixel of the running app.
 
-**Architecture:** Content is authored as markdown notes under `content/<track>/<NN-block>/<id>.md` with a `ru/` mirror per folder. Build-time Node scripts (run via `tsx`) parse the notes, validate them, and emit `src/data/content/*.ts` + `index.ts` (now generated & git-ignored). A "normalized topic" (`NormTopic`) intermediate — every prose field decomposed into `{ru, en}` via the project's own `splitLocalized` — is the correctness contract: the migration captures a baseline of all 107 topics as `NormTopic` JSON, and a round-trip test proves the regenerated TS renders identically.
+**Architecture:** Content is authored as markdown notes under `content/<track>/<NN-block>/<id>.md` with a `ru/` mirror per folder. Build-time Node scripts (run via `tsx`) parse the notes, validate them, and emit `src/data/content/*.ts` + `index.ts` (now generated & git-ignored). A "normalized topic" (`NormTopic`) intermediate — every prose field decomposed into `{ru, en}` via the project's own `splitLocalized` — is the correctness contract: the migration captures a baseline of all 106 topics as `NormTopic` JSON, and a round-trip test proves the regenerated TS renders identically.
 
 **Tech Stack:** TypeScript, Next.js 16, Vitest (new), gray-matter (frontmatter), tsx (script runner). No app/runtime dependencies are added — all new code runs at build time on the dev machine.
 
@@ -390,7 +390,7 @@ Note: `src/data/content/index.ts` already has `export { contentModules };` (a na
 - [ ] **Step 2: Run the snapshot script**
 
 Run: `npm run snapshot-baseline`
-Expected: prints `Wrote baseline for 107 topics`; `tests/fixtures/content-baseline.json` exists.
+Expected: prints `Wrote baseline for 106 topics`; `tests/fixtures/content-baseline.json` exists.
 
 - [ ] **Step 3: Write a test asserting baseline integrity**
 
@@ -1123,12 +1123,12 @@ git commit -m "feat: vault migration + compile orchestrator"
 - [ ] **Step 1: Run the migration**
 
 Run: `npm run migrate-content`
-Expected: prints `Migrated 107 topics into content/`; `content/java-core/01-how-java-works/1-1.md` and `content/java-core/01-how-java-works/ru/1-1.md` exist.
+Expected: prints `Migrated 106 topics into content/`; `content/java-core/01-how-java-works/1-1.md` and `content/java-core/01-how-java-works/ru/1-1.md` exist.
 
 - [ ] **Step 2: Run the compiler**
 
 Run: `npm run compile-content`
-Expected: prints content warnings for thin/draft topics (expected), `Compiled 107 topics → src/data/content/`, and exits 0 (no errors, because everything is `draft`).
+Expected: prints content warnings for thin/draft topics (expected), `Compiled 106 topics → src/data/content/`, and exits 0 (no errors, because everything is `draft`).
 
 - [ ] **Step 3: Write the round-trip test**
 
@@ -1237,5 +1237,5 @@ git commit -m "feat: vault is source of truth; content compiled from markdown"
 
 ## Notes for the executor
 - Run tasks in order; Tasks 3–7 are pure and independently testable; Tasks 8–9 are sequential (migration must run before compile).
-- If `npm run snapshot-baseline` (Task 4) reports fewer than 107 topics, check that `src/data/content/index.ts` resolves every module before continuing — the baseline is the safety net for the whole plan.
+- If `npm run snapshot-baseline` (Task 4) reports fewer than 106 topics, check that `src/data/content/index.ts` resolves every module before continuing — the baseline is the safety net for the whole plan.
 - The expected warning count in Task 9 Step 2 is large (blocks 5–22 are thin); that is correct — they are `draft`. Closing those gaps is the *Vault Ingest + Translation* plan.
