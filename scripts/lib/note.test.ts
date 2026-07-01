@@ -53,7 +53,7 @@ describe("note round-trip with new optional sections", () => {
     gotcha: { ru: "подвох", en: "gotcha" },
     recap: { ru: "итог", en: "recap" },
     checkpoints: [{ id: "cp1", prompt: { ru: "вопрос", en: "prompt" }, answer: { ru: "ответ", en: "answer" } }],
-    keyTerms: [{ term: "treeify", definition: { ru: "дерево", en: "tree it" } }],
+    keyTerms: [{ term: "treeify", definition: { ru: "дерево\n\nвторая строка", en: "tree it\n\nsecond line" } }],
   };
 
   it("preserves all new sections", () => {

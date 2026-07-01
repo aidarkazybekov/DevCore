@@ -123,10 +123,15 @@ function parseKeyTerms(enText: string | undefined, ruText: string | undefined) {
   if (enText === undefined && ruText === undefined) return undefined;
   const side = (text: string) => {
     const items: { term: string; definition: string }[] = [];
+    let cur: { term: string; definition: string } | null = null;
+    let buf: string[] = [];
+    const flush = () => { if (cur) { cur.definition = buf.join("\n").trim(); items.push(cur); } buf = []; };
     for (const line of text.split("\n")) {
-      const m = line.match(/^-\s*(.+?)\s*::\s*(.*)$/);
-      if (m) items.push({ term: m[1].trim(), definition: m[2].trim() });
+      const m = line.match(/^###\s+(.+?)\s*$/);
+      if (m) { flush(); cur = { term: m[1].trim(), definition: "" }; }
+      else if (cur) buf.push(line);
     }
+    flush();
     return items;
   };
   const en = side(enText ?? "");
@@ -165,7 +170,7 @@ export function serializeNote(n: NormTopic, track: string, status: "draft" | "pu
       parts.push(`## Checkpoint\n${cps}`);
     }
     if (n.keyTerms) {
-      const kts = n.keyTerms.map((k) => `- ${k.term} :: ${k.definition[side]}`).join("\n");
+      const kts = n.keyTerms.map((k) => `### ${k.term}\n${k.definition[side]}`).join("\n\n");
       parts.push(`## Key Terms\n${kts}`);
     }
     const qs = n.interviewQs
