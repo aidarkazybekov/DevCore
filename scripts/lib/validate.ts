@@ -27,6 +27,21 @@ export function validateTopic(n: NormTopic, status: "draft" | "published") {
     checkLoc(n.spring.explanation, "spring.explanation");
   }
 
+  if (n.tldr) checkLoc(n.tldr, "tldr");
+  if (n.analogy) checkLoc(n.analogy, "analogy");
+  if (n.whatWhy) checkLoc(n.whatWhy, "whatWhy");
+  if (n.howItWorks) checkLoc(n.howItWorks, "howItWorks");
+  if (n.gotcha) checkLoc(n.gotcha, "gotcha");
+  if (n.recap) checkLoc(n.recap, "recap");
+  n.checkpoints?.forEach((c, i) => {
+    checkLoc(c.prompt, `checkpoints[${i}].prompt`);
+    checkLoc(c.answer, `checkpoints[${i}].answer`);
+  });
+  n.keyTerms?.forEach((k, i) => {
+    if (!k.term.trim()) issues.push(`${n.id}: keyTerms[${i}].term is empty`);
+    checkLoc(k.definition, `keyTerms[${i}].definition`);
+  });
+
   return status === "published"
     ? { errors: issues, warnings: [] }
     : { errors: [], warnings: issues };

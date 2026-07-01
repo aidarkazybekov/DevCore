@@ -42,3 +42,20 @@ describe("validateTopic", () => {
     expect(r.warnings).toContain("x: interviewQs[0].difficulty invalid: expert");
   });
 });
+
+describe("validateTopic new optional fields", () => {
+  const withTldr = { ...base, tldr: { ru: "", en: "short" } };
+
+  it("errors on a present field missing RU when published", () => {
+    expect(validateTopic(withTldr, "published").errors.length).toBeGreaterThan(0);
+  });
+  it("warns (not errors) when draft", () => {
+    const r = validateTopic(withTldr, "draft");
+    expect(r.errors).toEqual([]);
+    expect(r.warnings.length).toBeGreaterThan(0);
+  });
+  it("flags an empty key-term label", () => {
+    const bad = { ...base, keyTerms: [{ term: "", definition: { ru: "д", en: "d" } }] };
+    expect(validateTopic(bad, "published").errors.some((e) => e.includes("keyTerms"))).toBe(true);
+  });
+});
