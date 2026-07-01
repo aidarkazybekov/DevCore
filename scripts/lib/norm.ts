@@ -4,6 +4,8 @@ import type { TopicContent, InterviewQuestion, SpringConnection } from "../../sr
 export interface Loc { ru: string; en: string }
 export interface NormQ { id: string; difficulty: InterviewQuestion["difficulty"]; q: Loc; a: Loc }
 export interface NormSpring { concept: Loc; springFeature: Loc; explanation: Loc }
+export interface NormCheckpoint { id: string; prompt: Loc; answer: Loc }
+export interface NormKeyTerm { term: string; definition: Loc }
 export interface NormTopic {
   id: string;
   blockId: number;
@@ -15,13 +17,21 @@ export interface NormTopic {
   code: string;
   interviewQs: NormQ[];
   spring: NormSpring | null;
+  tldr?: Loc;
+  analogy?: Loc;
+  whatWhy?: Loc;
+  howItWorks?: Loc;
+  gotcha?: Loc;
+  recap?: Loc;
+  checkpoints?: NormCheckpoint[];
+  keyTerms?: NormKeyTerm[];
 }
 
 const L = (s: string): Loc => splitLocalized(s);
 const J = (l: Loc): string => joinLocalized(l.ru, l.en);
 
 export function decompose(t: TopicContent): NormTopic {
-  return {
+  const n: NormTopic = {
     id: t.id,
     blockId: t.blockId,
     diagram: t.diagram,
@@ -44,6 +54,15 @@ export function decompose(t: TopicContent): NormTopic {
         }
       : null,
   };
+  if (t.tldr !== undefined) n.tldr = L(t.tldr);
+  if (t.analogy !== undefined) n.analogy = L(t.analogy);
+  if (t.whatWhy !== undefined) n.whatWhy = L(t.whatWhy);
+  if (t.howItWorks !== undefined) n.howItWorks = L(t.howItWorks);
+  if (t.gotcha !== undefined) n.gotcha = L(t.gotcha);
+  if (t.recap !== undefined) n.recap = L(t.recap);
+  if (t.checkpoints) n.checkpoints = t.checkpoints.map((c) => ({ id: c.id, prompt: L(c.prompt), answer: L(c.answer) }));
+  if (t.keyTerms) n.keyTerms = t.keyTerms.map((k) => ({ term: k.term, definition: L(k.definition) }));
+  return n;
 }
 
 export function recompose(n: NormTopic): TopicContent {
@@ -71,5 +90,13 @@ export function recompose(n: NormTopic): TopicContent {
     springConnection: spring,
   };
   if (n.diagram !== undefined) topic.diagram = n.diagram;
+  if (n.tldr) topic.tldr = J(n.tldr);
+  if (n.analogy) topic.analogy = J(n.analogy);
+  if (n.whatWhy) topic.whatWhy = J(n.whatWhy);
+  if (n.howItWorks) topic.howItWorks = J(n.howItWorks);
+  if (n.gotcha) topic.gotcha = J(n.gotcha);
+  if (n.recap) topic.recap = J(n.recap);
+  if (n.checkpoints) topic.checkpoints = n.checkpoints.map((c) => ({ id: c.id, prompt: J(c.prompt), answer: J(c.answer) }));
+  if (n.keyTerms) topic.keyTerms = n.keyTerms.map((k) => ({ term: k.term, definition: J(k.definition) }));
   return topic;
 }
