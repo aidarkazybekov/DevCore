@@ -9,6 +9,14 @@ export interface TopicContent {
   tip: string;
   springConnection: SpringConnection | null;
   diagram?: string;
+  tldr?: string;        // bilingual
+  analogy?: string;     // bilingual
+  whatWhy?: string;     // bilingual
+  howItWorks?: string;  // bilingual
+  gotcha?: string;      // bilingual
+  recap?: string;       // bilingual
+  checkpoints?: Checkpoint[];
+  keyTerms?: KeyTerm[];
 }
 
 export interface SpringConnection {
@@ -22,6 +30,17 @@ export interface InterviewQuestion {
   q: string;
   a: string;
   difficulty: "junior" | "mid" | "senior";
+}
+
+export interface Checkpoint {
+  id: string;
+  prompt: string;   // bilingual (\n---\n)
+  answer: string;   // bilingual
+}
+
+export interface KeyTerm {
+  term: string;         // single language-neutral label
+  definition: string;   // bilingual
 }
 
 export interface Block {
