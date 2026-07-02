@@ -51,13 +51,13 @@ export default function LessonView({
       {vis.has("whatWhy") && r.whatWhy && (
         <div>
           <Label>{locale === "ru" ? "Что и зачем" : "What & Why"}</Label>
-          <Markdown>{localized(r.whatWhy, locale)}</Markdown>
+          <Markdown keyTerms={kt} locale={locale}>{localized(r.whatWhy, locale)}</Markdown>
         </div>
       )}
       {vis.has("howItWorks") && (
         <div>
           <Label>{locale === "ru" ? "Как это работает" : "How it works"}</Label>
-          <Markdown>{localized(r.howItWorks, locale)}</Markdown>
+          <Markdown keyTerms={kt} locale={locale}>{localized(r.howItWorks, locale)}</Markdown>
         </div>
       )}
       {vis.has("code") && <CodeTab content={content} highlightedCode={highlightedCode} />}

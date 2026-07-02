@@ -3,6 +3,9 @@
 import { ReactNode, useState, Children, isValidElement } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { annotateTerms } from "@/lib/key-terms";
+import { localized } from "@/lib/i18n";
+import type { KeyTerm } from "@/lib/types";
 
 type CalloutType = "tip" | "warning" | "gotcha" | "info" | "production";
 
@@ -134,15 +137,44 @@ export function slugify(text: string): string {
 interface MarkdownProps {
   children: string;
   className?: string;
+  keyTerms?: KeyTerm[];
+  locale?: "ru" | "en";
 }
 
-export default function Markdown({ children, className = "" }: MarkdownProps) {
+export default function Markdown({ children, className = "", keyTerms = [], locale = "en" }: MarkdownProps) {
+  const terms = keyTerms.map((k) => k.term).filter((t) => t.trim());
+  const defByTerm = new Map(keyTerms.map((k) => [k.term.toLowerCase(), localized(k.definition, locale)]));
+  const used = new Set<string>();
+
+  const annotate = (node: ReactNode): ReactNode => {
+    if (terms.length === 0) return node;
+    return Children.map(node, (child) => {
+      if (typeof child !== "string") return child; // elements (incl. inline code) untouched
+      const remaining = terms.filter((t) => !used.has(t.toLowerCase()));
+      const segs = annotateTerms(child, remaining);
+      if (!segs.some((s) => s.term)) return child;
+      return segs.map((s, i) => {
+        if (!s.term) return <span key={i}>{s.text}</span>;
+        used.add(s.term.toLowerCase());
+        return (
+          <span
+            key={i}
+            title={defByTerm.get(s.term.toLowerCase()) ?? ""}
+            className="border-b border-dashed border-accent-green/60 cursor-help"
+          >
+            {s.text}
+          </span>
+        );
+      });
+    });
+  };
+
   return (
     <div className={`text-[13px] leading-[1.8] text-text-secondary ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          p: ({ children }) => <p className="mb-3.5 leading-[1.85]">{children}</p>,
+          p: ({ children }) => <p className="mb-3.5 leading-[1.85]">{annotate(children)}</p>,
           h1: ({ children }) => {
             const id = slugify(extractFirstText(children));
             return (
@@ -175,7 +207,7 @@ export default function Markdown({ children, className = "" }: MarkdownProps) {
               {children}
             </ol>
           ),
-          li: ({ children }) => <li className="leading-[1.7]">{children}</li>,
+          li: ({ children }) => <li className="leading-[1.7]">{annotate(children)}</li>,
           strong: ({ children }) => (
             <strong className="text-text-primary font-semibold">{children}</strong>
           ),
