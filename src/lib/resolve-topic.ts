@@ -1,5 +1,13 @@
 import type { TopicContent, Checkpoint, KeyTerm, InterviewQuestion, SpringConnection } from "./types";
 
+export type DiagramRef = { kind: "react"; key: string } | { kind: "mermaid"; src: string };
+
+function toDiagramRef(c: TopicContent): DiagramRef | undefined {
+  if (c.diagram === "mermaid") return c.diagramSrc ? { kind: "mermaid", src: c.diagramSrc } : undefined;
+  if (c.diagram) return { kind: "react", key: c.diagram };
+  return undefined;
+}
+
 export interface ResolvedTopic {
   id: string;
   blockId: number;
@@ -15,7 +23,7 @@ export interface ResolvedTopic {
   keyTerms: KeyTerm[];
   interviewQs: InterviewQuestion[];
   springConnection: SpringConnection | null;
-  diagram?: string;
+  diagram?: DiagramRef;
 }
 
 export function resolveTopic(c: TopicContent): ResolvedTopic {
@@ -34,6 +42,6 @@ export function resolveTopic(c: TopicContent): ResolvedTopic {
     keyTerms: c.keyTerms ?? [],
     interviewQs: c.interviewQs,
     springConnection: c.springConnection,
-    diagram: c.diagram,
+    diagram: toDiagramRef(c),
   };
 }
