@@ -69,3 +69,21 @@ describe("note round-trip with new optional sections", () => {
     expect(back.keyTerms).toEqual(n.keyTerms);
   });
 });
+
+describe("note round-trip with mermaid diagramSrc", () => {
+  const n: NT2 = {
+    id: "3-7", blockId: 3, diagram: "mermaid",
+    diagramSrc: 'graph TD\n  A["OrderService"] --> B["«interface»<br/>NotificationSender"]',
+    title: { ru: "SOLID", en: "SOLID" }, summary: { ru: "с", en: "s" },
+    deepDive: { ru: "г", en: "d" }, tip: { ru: "т", en: "t" }, code: "class A {}",
+    interviewQs: [{ id: "3-7-q0", difficulty: "mid", q: { ru: "в", en: "q" }, a: { ru: "о", en: "a" } }],
+    spring: null,
+  };
+
+  it("preserves diagram + diagramSrc through serialize→parse", () => {
+    const { en, ru } = serializeNote(n, "java-core", "draft");
+    const back = parseNotePair(en, ru);
+    expect(back.diagram).toBe("mermaid");
+    expect(back.diagramSrc).toBe(n.diagramSrc);
+  });
+});

@@ -41,6 +41,9 @@ export function validateTopic(n: NormTopic, status: "draft" | "published") {
     if (!k.term.trim()) issues.push(`${n.id}: keyTerms[${i}].term is empty`);
     checkLoc(k.definition, `keyTerms[${i}].definition`);
   });
+  if (n.diagram === "mermaid" && !n.diagramSrc?.trim()) {
+    issues.push(`${n.id}: diagram is "mermaid" but the ## Diagram block is missing or empty`);
+  }
 
   return status === "published"
     ? { errors: issues, warnings: [] }
