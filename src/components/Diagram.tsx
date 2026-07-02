@@ -7,6 +7,8 @@ import StreamPipelineDiagram from "./diagrams/StreamPipelineDiagram";
 import GarbageCollectionDiagram from "./diagrams/GarbageCollectionDiagram";
 import SpringBeanLifecycleDiagram from "./diagrams/SpringBeanLifecycleDiagram";
 import SqlIndexDiagram from "./diagrams/SqlIndexDiagram";
+import MermaidDiagram from "./lesson/MermaidDiagram";
+import type { DiagramRef } from "@/lib/resolve-topic";
 
 const REGISTRY = {
   "jvm-architecture": JvmArchitectureDiagram,
@@ -20,8 +22,9 @@ const REGISTRY = {
 
 export type DiagramName = keyof typeof REGISTRY;
 
-export default function Diagram({ name }: { name: string }) {
-  const Component = REGISTRY[name as DiagramName];
+export default function Diagram({ diagram }: { diagram: DiagramRef }) {
+  if (diagram.kind === "mermaid") return <MermaidDiagram src={diagram.src} />;
+  const Component = REGISTRY[diagram.key as DiagramName];
   if (!Component) return null;
   return <Component />;
 }

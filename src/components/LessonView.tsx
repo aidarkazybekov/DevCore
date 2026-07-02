@@ -47,7 +47,7 @@ export default function LessonView({
     <div className="flex flex-col gap-6">
       {vis.has("tldr") && <TldrLead text={localized(r.tldr, locale)} keyTerms={kt} locale={locale} />}
       {vis.has("analogy") && r.analogy && <Analogy text={localized(r.analogy, locale)} keyTerms={kt} locale={locale} />}
-      {vis.has("diagram") && r.diagram && <Diagram name={r.diagram} />}
+      {vis.has("diagram") && r.diagram && <Diagram diagram={r.diagram} />}
       {vis.has("whatWhy") && r.whatWhy && (
         <div>
           <Label>{locale === "ru" ? "Что и зачем" : "What & Why"}</Label>
