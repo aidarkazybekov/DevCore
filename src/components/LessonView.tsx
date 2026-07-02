@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { TopicContent, ProgressState } from "@/lib/types";
 import { localized, useLocale } from "@/lib/i18n";
 import { resolveTopic } from "@/lib/resolve-topic";
-import { visibleSections } from "@/lib/lesson-layers";
+import { visibleSections, showMiniQuiz } from "@/lib/lesson-layers";
 import type { Depth } from "@/lib/depth";
 import Diagram from "./Diagram";
 import CodeTab from "./CodeTab";
@@ -68,7 +68,7 @@ export default function LessonView({
         ))}
       {vis.has("recap") && r.recap && <Recap text={localized(r.recap, locale)} keyTerms={kt} locale={locale} />}
       {vis.has("interview") && (
-        <div>
+        <div ref={quizRef}>
           <Label>{locale === "ru" ? "Вопросы на интервью" : "Interview questions"}</Label>
           <InterviewTab content={content} progress={progress} onRate={onRate} />
         </div>
@@ -76,7 +76,9 @@ export default function LessonView({
       {vis.has("spring") && content.springConnection && <SpringTab content={content} />}
       {vis.has("glossary") && <Glossary terms={kt} locale={locale} />}
       <CompletionNudge locale={locale} onStart={toQuiz} />
-      <MiniQuiz questions={content.interviewQs} onRate={onRate} anchorRef={quizRef} />
+      {showMiniQuiz(depth) && (
+        <MiniQuiz questions={content.interviewQs} onRate={onRate} anchorRef={quizRef} />
+      )}
     </div>
   );
 }
