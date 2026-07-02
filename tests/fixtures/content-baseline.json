@@ -4560,6 +4560,7 @@
   "3-7": {
     "id": "3-7",
     "blockId": 3,
+    "diagram": "mermaid",
     "title": {
       "ru": "SOLID Principles",
       "en": "SOLID Principles"
