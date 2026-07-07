@@ -9,6 +9,7 @@ export interface TopicContent {
   tip: string;
   springConnection: SpringConnection | null;
   diagram?: string;
+  diagramSrc?: string;  // Mermaid source; present only when diagram === "mermaid"
   tldr?: string;        // bilingual
   analogy?: string;     // bilingual
   whatWhy?: string;     // bilingual

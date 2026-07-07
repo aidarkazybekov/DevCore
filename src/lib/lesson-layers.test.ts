@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { isVisible, visibleSections } from "./lesson-layers";
+import { showMiniQuiz } from "./lesson-layers";
 
 describe("lesson-layers", () => {
   it("quick shows only tldr/analogy/diagram/recap", () => {
@@ -17,5 +18,15 @@ describe("lesson-layers", () => {
   });
   it("tldr is visible at every depth", () => {
     for (const d of ["quick", "standard", "deep"] as const) expect(isVisible("tldr", d)).toBe(true);
+  });
+});
+
+describe("showMiniQuiz", () => {
+  it("shows the mini-quiz at quick and standard depth", () => {
+    expect(showMiniQuiz("quick")).toBe(true);
+    expect(showMiniQuiz("standard")).toBe(true);
+  });
+  it("hides the mini-quiz at deep depth (interview layer covers recall)", () => {
+    expect(showMiniQuiz("deep")).toBe(false);
   });
 });

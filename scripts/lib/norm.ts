@@ -10,6 +10,7 @@ export interface NormTopic {
   id: string;
   blockId: number;
   diagram?: string;
+  diagramSrc?: string;
   title: Loc;
   summary: Loc;
   deepDive: Loc;
@@ -54,6 +55,7 @@ export function decompose(t: TopicContent): NormTopic {
         }
       : null,
   };
+  if (t.diagramSrc !== undefined) n.diagramSrc = t.diagramSrc;
   if (t.tldr !== undefined) n.tldr = L(t.tldr);
   if (t.analogy !== undefined) n.analogy = L(t.analogy);
   if (t.whatWhy !== undefined) n.whatWhy = L(t.whatWhy);
@@ -90,6 +92,7 @@ export function recompose(n: NormTopic): TopicContent {
     springConnection: spring,
   };
   if (n.diagram !== undefined) topic.diagram = n.diagram;
+  if (n.diagramSrc !== undefined) topic.diagramSrc = n.diagramSrc;
   if (n.tldr) topic.tldr = J(n.tldr);
   if (n.analogy) topic.analogy = J(n.analogy);
   if (n.whatWhy) topic.whatWhy = J(n.whatWhy);

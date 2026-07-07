@@ -18,3 +18,7 @@ export function visibleSections(depth: Depth): Set<LessonSection> {
 export function isVisible(section: LessonSection, depth: Depth): boolean {
   return visibleSections(depth).has(section);
 }
+
+export function showMiniQuiz(depth: Depth): boolean {
+  return !isVisible("interview", depth);
+}

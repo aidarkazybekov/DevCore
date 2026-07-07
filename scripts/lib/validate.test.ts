@@ -58,4 +58,9 @@ describe("validateTopic new optional fields", () => {
     const bad = { ...base, keyTerms: [{ term: "", definition: { ru: "д", en: "d" } }] };
     expect(validateTopic(bad, "published").errors.some((e) => e.includes("keyTerms"))).toBe(true);
   });
+  it("errors when diagram is mermaid but diagramSrc is missing", () => {
+    const bad = { ...base, diagram: "mermaid", diagramSrc: "" };
+    const { errors } = validateTopic(bad, "published");
+    expect(errors.some((e) => e.includes("## Diagram"))).toBe(true);
+  });
 });

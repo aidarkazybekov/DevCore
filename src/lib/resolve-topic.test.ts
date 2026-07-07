@@ -39,3 +39,23 @@ describe("resolveTopic", () => {
     expect(resolveTopic({ ...legacy, tip: "" }).gotcha).toBeUndefined();
   });
 });
+
+describe("resolveTopic diagram mapping", () => {
+  const base = { id: "x", blockId: 1, title: "T", summary: "s", deepDive: "d",
+    code: "c", tip: "t", interviewQs: [], springConnection: null } as unknown as TopicContent;
+
+  it("maps a plain diagram key to a react ref", () => {
+    expect(resolveTopic({ ...base, diagram: "jvm-architecture" }).diagram)
+      .toEqual({ kind: "react", key: "jvm-architecture" });
+  });
+  it("maps diagram:mermaid + diagramSrc to a mermaid ref", () => {
+    expect(resolveTopic({ ...base, diagram: "mermaid", diagramSrc: "graph TD\n A-->B" }).diagram)
+      .toEqual({ kind: "mermaid", src: "graph TD\n A-->B" });
+  });
+  it("omits the diagram when mermaid is declared but src is missing", () => {
+    expect(resolveTopic({ ...base, diagram: "mermaid" }).diagram).toBeUndefined();
+  });
+  it("omits the diagram when none is set", () => {
+    expect(resolveTopic(base).diagram).toBeUndefined();
+  });
+});

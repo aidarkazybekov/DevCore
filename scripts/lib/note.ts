@@ -8,7 +8,7 @@ const Q_HEAD = /^###\s+\[([^|\]]+)\|([^\]]+)\]\s*(.*)$/;
 // Any other `##` (e.g. `## Runtime Data Areas` inside a deepDive) is content.
 const RESERVED = new Set([
   "title", "summary", "deep dive", "code", "tip", "spring", "interview",
-  "tl;dr", "analogy", "what & why", "how it works", "gotcha", "recap", "checkpoint", "key terms",
+  "tl;dr", "analogy", "what & why", "how it works", "gotcha", "recap", "checkpoint", "key terms", "diagram",
 ]);
 
 /** Split markdown body (frontmatter already stripped) into reserved `## Section` → text. */
@@ -153,6 +153,7 @@ export function serializeNote(n: NormTopic, track: string, status: "draft" | "pu
     parts.push(`## Summary\n${n.summary[side]}`);
     parts.push(`## Deep Dive\n${n.deepDive[side]}`);
     parts.push(`## Code\n${fence(n.code)}`);
+    if (n.diagramSrc) parts.push("## Diagram\n```mermaid\n" + n.diagramSrc + "\n```");
     parts.push(`## Tip\n${n.tip[side]}`);
     if (n.spring) {
       parts.push(
@@ -215,5 +216,6 @@ export function parseNotePair(enRaw: string, ruRaw: string): NormTopic {
   const checkpoints = parseCheckpoints(es["checkpoint"], rs["checkpoint"]); if (checkpoints) topic.checkpoints = checkpoints;
   const keyTerms = parseKeyTerms(es["key terms"], rs["key terms"]); if (keyTerms) topic.keyTerms = keyTerms;
   if (en.data.diagram !== undefined) topic.diagram = String(en.data.diagram);
+  if (es["diagram"] !== undefined) topic.diagramSrc = unfence(es["diagram"]);
   return topic;
 }

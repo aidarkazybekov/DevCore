@@ -2,6 +2,7 @@
 
 import { TopicContent } from "@/lib/types";
 import { localized, t, useLocale } from "@/lib/i18n";
+import { resolveTopic } from "@/lib/resolve-topic";
 import Markdown from "./Markdown";
 import Diagram from "./Diagram";
 
@@ -11,6 +12,7 @@ interface LearnTabProps {
 
 export default function LearnTab({ content }: LearnTabProps) {
   const { locale } = useLocale();
+  const r = resolveTopic(content);
   const summary = localized(content.summary, locale);
   const deepDive = localized(content.deepDive, locale);
   const tip = content.tip ? localized(content.tip, locale) : "";
@@ -25,7 +27,7 @@ export default function LearnTab({ content }: LearnTabProps) {
           <Markdown>{summary}</Markdown>
         </div>
       </div>
-      {content.diagram && <Diagram name={content.diagram} />}
+      {r.diagram && <Diagram diagram={r.diagram} />}
       <div>
         <div className="text-[10px] text-text-muted tracking-[2px] uppercase mb-3">
           {t("deepDive", locale)}

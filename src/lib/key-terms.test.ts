@@ -19,4 +19,16 @@ describe("annotateTerms", () => {
   it("returns one plain segment for empty term list", () => {
     expect(annotateTerms("plain", [])).toEqual([{ text: "plain" }]);
   });
+  it("supports first-occurrence-across-calls via a shared used-set filter", () => {
+    const terms = ["heap"];
+    const used = new Set<string>();
+    const firstRemaining = terms.filter((t) => !used.has(t.toLowerCase()));
+    const seg1 = annotateTerms("the heap grows", firstRemaining);
+    seg1.filter((s) => s.term).forEach((s) => used.add(s.term!.toLowerCase()));
+    expect(seg1.some((s) => s.term === "heap")).toBe(true);
+
+    const secondRemaining = terms.filter((t) => !used.has(t.toLowerCase()));
+    const seg2 = annotateTerms("the heap again", secondRemaining);
+    expect(seg2.some((s) => s.term)).toBe(false); // already used → not underlined
+  });
 });
