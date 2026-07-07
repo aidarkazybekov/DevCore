@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { codeToHtml } from "shiki";
+import { highlightJava } from "@/lib/highlighter";
 import { ROADMAP } from "@/data/roadmap";
 import { getTopicContent } from "@/data/content";
 import { getTopic } from "@/data/roadmap";
@@ -23,10 +23,7 @@ export default async function TopicPage({
   const content = await getTopicContent(id);
   if (!content) notFound();
 
-  const highlightedCode = await codeToHtml(content.code, {
-    lang: "java",
-    theme: "github-dark-dimmed",
-  });
+  const highlightedCode = await highlightJava(content.code);
 
   const topicIndexInBlock = meta.block.topics.findIndex((t) => t.id === id);
 

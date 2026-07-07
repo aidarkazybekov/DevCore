@@ -7,8 +7,15 @@ import StreamPipelineDiagram from "./diagrams/StreamPipelineDiagram";
 import GarbageCollectionDiagram from "./diagrams/GarbageCollectionDiagram";
 import SpringBeanLifecycleDiagram from "./diagrams/SpringBeanLifecycleDiagram";
 import SqlIndexDiagram from "./diagrams/SqlIndexDiagram";
-import MermaidDiagram from "./lesson/MermaidDiagram";
+import dynamic from "next/dynamic";
 import type { DiagramRef } from "@/lib/resolve-topic";
+
+// Mermaid + its deps (cytoscape, katex, dagre ≈ 3 MB) render client-only, so
+// load them with ssr:false to keep them out of the Cloudflare Worker's server
+// bundle, which must stay under the size limit.
+const MermaidDiagram = dynamic(() => import("./lesson/MermaidDiagram"), {
+  ssr: false,
+});
 
 const REGISTRY = {
   "jvm-architecture": JvmArchitectureDiagram,
